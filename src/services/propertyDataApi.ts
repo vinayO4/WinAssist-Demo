@@ -40,22 +40,6 @@ export interface PropertyDetails {
   source: 'zillow' | 'realtor' | 'attom' | 'mock';
 }
 
-interface ZillowAPIResponse {
-  zpid: string;
-  streetAddress: string;
-  city: string;
-  state: string;
-  zipcode: string;
-  yearBuilt: number;
-  livingArea: number;
-  lotAreaValue: number;
-  bedrooms: number;
-  bathrooms: number;
-  homeType: string;
-  price: number;
-  // ... many more fields
-}
-
 /**
  * Parse address from transcript
  * Extracts: street address, city, state, ZIP
@@ -279,13 +263,6 @@ function transformZillowData(data: any): PropertyDetails {
 
   // Use zestimate if available, otherwise use listing price
   const estimatedValue = zestimate || listingPrice;
-
-  // Extract other details
-  const zpid = data.PropertyZPID || data.zpid || null;
-  const zillowURL = data.PropertyZillowURL || data.url || null;
-  const daysOnZillow = data.daysOnZillow || null;
-  const subdivision = addressData.subdivision || null;
-  const neighborhood = addressData.neighborhood || null;
 
   // Property type from subdivision/neighborhood or default
   const propertyType = data.homeType || data.propertyType || 'Single Family';

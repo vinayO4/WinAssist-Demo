@@ -11,7 +11,6 @@ export interface VoiceProfile {
 
 export class SpeakerIdentifier {
   private audioContext: AudioContext;
-  private analyser: AnalyserNode | null = null;
   private profiles: Map<string, VoiceProfile> = new Map();
   private currentSpeaker: string | null = null;
 

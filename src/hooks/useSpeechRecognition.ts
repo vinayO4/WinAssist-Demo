@@ -74,11 +74,11 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     recognition.continuous = true;
     recognition.interimResults = true; // Enable real-time interim results
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 3; // Get multiple alternatives for better accuracy
+    (recognition as any).maxAlternatives = 3; // Get multiple alternatives for better accuracy
 
     console.log('[init] Speech recognition initialized with continuous =', recognition.continuous);
 
-    recognition.onstart = () => {
+    (recognition as any).onstart = () => {
       console.log('[onstart] Speech recognition started (restart #' + restartCountRef.current + ')');
       setIsListening(true);
     };
@@ -349,7 +349,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   }, [isListening, stopListening]);
 
   // Train speaker identification
-  const trainSpeaker = useCallback(async (speakerId: 'sp' | 'client', duration: number = 3000) => {
+  const trainSpeaker = useCallback(async (speakerId: 'sp' | 'client') => {
     if (!mediaStream) {
       setError('Please start listening first before training');
       return;

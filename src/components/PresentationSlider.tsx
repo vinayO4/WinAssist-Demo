@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PresentationSliderProps {
   isOpen: boolean;
@@ -6,41 +6,8 @@ interface PresentationSliderProps {
   onStartDemo: () => void;
 }
 
-// Animated counter hook
-function useCountUp(end: number, duration: number = 2000, isActive: boolean = false) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isActive) {
-      setCount(0);
-      return;
-    }
-
-    let startTime: number;
-    let animationFrame: number;
-
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-
-      setCount(Math.floor(progress * end));
-
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
-    };
-
-    animationFrame = requestAnimationFrame(animate);
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [end, duration, isActive]);
-
-  return count;
-}
-
 export function PresentationSlider({ isOpen, onClose, onStartDemo }: PresentationSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
 
   const slides = [
     {
@@ -638,16 +605,14 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
     },
   ];
 
-  // Keyboard navigation with direction tracking
+  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' && currentSlide < slides.length - 1) {
-        setSlideDirection('forward');
         setCurrentSlide(currentSlide + 1);
       } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
-        setSlideDirection('backward');
         setCurrentSlide(currentSlide - 1);
       } else if (e.key === 'Escape') {
         onClose();
@@ -742,10 +707,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
         <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-16 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => {
-                setSlideDirection('backward');
-                setCurrentSlide(Math.max(0, currentSlide - 1));
-              }}
+              onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
               disabled={currentSlide === 0}
               className="flex items-center space-x-2 px-5 py-2 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 text-gray-900 font-medium rounded-lg transition-colors disabled:cursor-not-allowed text-sm"
             >
@@ -760,10 +722,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
               {slides.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => {
-                    setSlideDirection(index > currentSlide ? 'forward' : 'backward');
-                    setCurrentSlide(index);
-                  }}
+                  onClick={() => setCurrentSlide(index)}
                   className={`rounded-full transition-all ${
                     index === currentSlide
                       ? 'bg-blue-600 w-6 h-2'
@@ -776,7 +735,6 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
             <button
               onClick={() => {
                 if (currentSlide < slides.length - 1) {
-                  setSlideDirection('forward');
                   setCurrentSlide(currentSlide + 1);
                 } else {
                   onStartDemo();
