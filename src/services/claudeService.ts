@@ -1,16 +1,23 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { CoachingSuggestion, ZipData } from '../types/index';
 
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
+// Support multiple AI providers
+const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-if (!API_KEY) {
-  console.warn('VITE_ANTHROPIC_API_KEY not found in environment variables');
+// Determine which provider to use (Claude first, then Gemini, then mock)
+const AI_PROVIDER = ANTHROPIC_API_KEY ? 'anthropic' : GEMINI_API_KEY ? 'gemini' : 'mock';
+
+console.log(`Using AI provider: ${AI_PROVIDER}`);
+
+if (!ANTHROPIC_API_KEY && !GEMINI_API_KEY) {
+  console.warn('No API keys found. Add VITE_ANTHROPIC_API_KEY or VITE_GEMINI_API_KEY to .env file');
 }
 
-const client = new Anthropic({
-  apiKey: API_KEY,
+const client = ANTHROPIC_API_KEY ? new Anthropic({
+  apiKey: ANTHROPIC_API_KEY,
   dangerouslyAllowBrowser: true, // Note: For production, use a backend proxy
-});
+}) : null;
 
 export interface GenerateSuggestionsParams {
   transcript: string;
@@ -23,35 +30,158 @@ export async function generateCoachingSuggestions({
   zipData,
   context = '',
 }: GenerateSuggestionsParams): Promise<CoachingSuggestion[]> {
-  if (!API_KEY) {
-    // Return mock suggestions if no API key
+  const prompt = buildPrompt(transcript, zipData, context);
+
+  try {
+    switch (AI_PROVIDER) {
+      case 'anthropic':
+        return await callClaudeAPI(prompt, zipData);
+      case 'gemini':
+        return await callGeminiAPI(prompt, zipData);
+      default:
+        console.log('No API key available, using mock suggestions');
+        return getMockSuggestions(zipData);
+    }
+  } catch (error) {
+    console.error(`Error calling ${AI_PROVIDER} API:`, error);
     return getMockSuggestions(zipData);
+  }
+}
+
+// Claude API (original implementation)
+async function callClaudeAPI(prompt: string, zipData: ZipData | null): Promise<CoachingSuggestion[]> {
+  if (!client) {
+    return getMockSuggestions(zipData);
+  }
+
+  console.log('[Claude API] Generating suggestions...');
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+  });
+
+  const content = response.content[0];
+  if (content.type === 'text') {
+    console.log('[Claude API] ✓ Suggestions generated successfully');
+    return parseSuggestions(content.text);
+  }
+
+  return getMockSuggestions(zipData);
+}
+
+// Check available Gemini models for the API key
+async function listAvailableGeminiModels(): Promise<string[]> {
+  if (!GEMINI_API_KEY) {
+    console.warn('[Gemini API] No API key provided');
+    return [];
   }
 
   try {
-    const prompt = buildPrompt(transcript, zipData, context);
-
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models?key=${GEMINI_API_KEY}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ],
-    });
+      }
+    );
 
-    const content = response.content[0];
-    if (content.type === 'text') {
-      return parseSuggestions(content.text);
+    if (!response.ok) {
+      console.error('[Gemini API] Failed to list models:', response.status);
+      return [];
     }
 
-    return getMockSuggestions(zipData);
+    const data = await response.json();
+    const modelNames = data.models?.map((m: any) => m.name) || [];
+    console.log('[Gemini API] Available models:', modelNames);
+
+    // Filter for models that support generateContent
+    const generateContentModels = data.models
+      ?.filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+      .map((m: any) => m.name) || [];
+    console.log('[Gemini API] Models supporting generateContent:', generateContentModels);
+
+    return generateContentModels;
   } catch (error) {
-    console.error('Error calling Claude API:', error);
+    console.error('[Gemini API] Error listing models:', error);
+    return [];
+  }
+}
+
+// Google Gemini API (free alternative)
+async function callGeminiAPI(prompt: string, zipData: ZipData | null): Promise<CoachingSuggestion[]> {
+  if (!GEMINI_API_KEY) {
     return getMockSuggestions(zipData);
   }
+
+  // First, check available models (only on first call)
+  if (AI_PROVIDER === 'gemini') {
+    const availableModels = await listAvailableGeminiModels();
+    if (availableModels.length === 0) {
+      console.error('[Gemini API] No models available for this API key');
+      return getMockSuggestions(zipData);
+    }
+  }
+
+  console.log('[Gemini API] Generating suggestions...');
+
+  // Use v1 API with gemini-2.5-flash-lite (lighter model with lower demand)
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 2048,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[Gemini API] Error:', response.status, errorText);
+    console.error('[Gemini API] Check your API key at https://aistudio.google.com/apikey');
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  // Log full response for debugging
+  console.log('[Gemini API] Full response data:', JSON.stringify(data, null, 2));
+
+  const text = data.candidates[0]?.content?.parts[0]?.text;
+
+  if (text) {
+    console.log('[Gemini API] ✓ Received response');
+    console.log('[Gemini API] Response length:', text.length, 'characters');
+    console.log('[Gemini API] Response text:', text);
+    return parseSuggestions(text);
+  }
+
+  console.log('[Gemini API] No text in response, using mock suggestions');
+  return getMockSuggestions(zipData);
 }
 
 function buildPrompt(
@@ -95,7 +225,7 @@ LOCAL EXPERTISE DATA (use this to build credibility):
     if (zipData.topIssues && zipData.topIssues.length > 0) {
       prompt += `\nMOST COMMON ISSUES IN THIS ZIP (${totalReports} inspections):
 ${zipData.topIssues.slice(0, 3).map(issue =>
-  `- ${issue.categoryName}: ${issue.percentage}% of homes have ${issue.categoryName.toLowerCase()} issues`
+  `- ${issue.categoryName}: ${Math.min(issue.percentage, 100)}% of homes have ${issue.categoryName.toLowerCase()} issues`
 ).join('\n')}
 `;
     }
@@ -140,22 +270,56 @@ Format your response as JSON array:
 
 function parseSuggestions(response: string): CoachingSuggestion[] {
   try {
-    // Try to extract JSON from the response
-    const jsonMatch = response.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
+    console.log('[parseSuggestions] Attempting to parse response...');
+
+    let jsonText = '';
+
+    // Method 1: Try to extract JSON from markdown code blocks (```json ... ```)
+    let jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[1];
+      console.log('[parseSuggestions] Found JSON in markdown code block');
+    }
+
+    // Method 2: Try without closing backticks (incomplete markdown)
+    if (!jsonText) {
+      jsonMatch = response.match(/```json\s*([\s\S]*)/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[1];
+        console.log('[parseSuggestions] Found JSON in incomplete markdown block');
+      }
+    }
+
+    // Method 3: Try plain JSON array
+    if (!jsonText) {
+      jsonMatch = response.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+        console.log('[parseSuggestions] Found plain JSON array');
+      }
+    }
+
+    if (!jsonText) {
+      console.error('[parseSuggestions] No JSON array found in response');
+      console.error('[parseSuggestions] Full response:', response);
       throw new Error('No JSON array found in response');
     }
 
-    const parsed = JSON.parse(jsonMatch[0]);
-    return parsed.map((item: any, index: number) => ({
+    console.log('[parseSuggestions] Extracted JSON (first 200 chars):', jsonText.substring(0, 200) + '...');
+
+    const parsed = JSON.parse(jsonText);
+    const suggestions = parsed.map((item: any, index: number) => ({
       id: `suggestion-${Date.now()}-${index}`,
       text: item.text,
       tag: item.tag,
       confidence: 0.9,
       reasoning: item.reasoning,
     }));
+
+    console.log('[parseSuggestions] ✓ Successfully parsed', suggestions.length, 'suggestions');
+    return suggestions;
   } catch (error) {
-    console.error('Error parsing Claude response:', error);
+    console.error('[parseSuggestions] Error parsing response:', error);
     return [];
   }
 }
@@ -202,7 +366,7 @@ function getMockSuggestions(zipData: ZipData | null): CoachingSuggestion[] {
     {
       id: 'mock-2',
       text: topIssue
-        ? `Based on our ${totalReports} inspections in your ZIP, ${topIssue.percentage}% of homes have ${topIssue.categoryName.toLowerCase()} issues. That's why we pay special attention to that during every inspection in your area.`
+        ? `Based on our ${totalReports} inspections in your ZIP, ${Math.min(topIssue.percentage, 100)}% of homes have ${topIssue.categoryName.toLowerCase()} issues. That's why we pay special attention to that during every inspection in your area.`
         : `We've found that homes in ZIP ${zipData.zip} typically have specific patterns - our inspectors know exactly what to check based on ${totalReports} local inspections.`,
       tag: 'Show Expertise',
       confidence: 0.9,

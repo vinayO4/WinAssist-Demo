@@ -27,28 +27,12 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
             </div>
 
             <h3 className="text-4xl font-bold mb-5 text-gray-900">
-              Turn Every Service Provider Into a Local Expert
+              Turn Every SP Into a Sales Expert
             </h3>
 
             <p className="text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              Real-time AI coaching that helps home inspection professionals <span className="font-semibold text-green-600">increase lead conversion</span> by demonstrating instant expertise about the client's specific property and neighborhood.
+              Real-time AI coaching that helps SPs increase lead conversion by demonstrating instant expertise about the client's specific property and neighborhood.
             </p>
-
-            {/* Key stats badges */}
-            <div className="flex justify-center items-center gap-6 mt-8">
-              <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-md border border-blue-200">
-                <div className="text-2xl font-bold text-blue-600">3x+</div>
-                <div className="text-xs text-gray-600 font-medium">Estimated Conversions</div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-md border border-green-200">
-                <div className="text-2xl font-bold text-green-600">Majority</div>
-                <div className="text-xs text-gray-600 font-medium">Expected Success</div>
-              </div>
-              <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-md border border-purple-200">
-                <div className="text-2xl font-bold text-purple-600">$XXM+</div>
-                <div className="text-xs text-gray-600 font-medium">Potential Impact</div>
-              </div>
-            </div>
           </div>
         </div>
       ),
@@ -62,36 +46,126 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
           {/* Main stat */}
           <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-6 border border-red-200 shadow-md">
             <div className="text-center">
-              <div className="text-5xl font-bold text-red-600 mb-3">Low Conversion</div>
-              <div className="text-xl font-semibold text-gray-900 mb-2">Industry Average</div>
-              <div className="text-base text-gray-700">
-                <span className="bg-red-100 px-4 py-2 rounded-full">Most leads choose competitors</span>
-              </div>
+              <div className="text-5xl font-bold text-red-600 mb-3">The revenue leak is happening on the phone</div>
+              <div className="text-xl font-semibold text-gray-900 mb-2">Price-sensitive callers are not hearing enough localized value to justify choosing WIN.</div>
             </div>
           </div>
 
           {/* Pain points */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="text-2xl mb-2">📞</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">Generic Responses</div>
-              <div className="text-xs text-gray-600">"Let me send you a quote..."</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">Most leads inquire about pricing</div>
             </div>
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="text-2xl mb-2">⏰</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">Slow Response</div>
-              <div className="text-xs text-gray-600">"I'll get back to you in 24 hours..."</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">Calls become price comparisons, not value conversations</div>
             </div>
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="text-2xl mb-2">❓</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">No Local Knowledge</div>
-              <div className="text-xs text-gray-600">"Not familiar with that area..."</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">New SPs lack confidence to differentiate</div>
             </div>
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="text-2xl mb-2">💸</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">Revenue Loss</div>
-              <div className="text-xs text-gray-600">Every lost lead = lost revenue opportunity</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">Result: Lost bookings + missed ancillary revenue</div>
             </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: 'current-approach-fails',
+      title: 'Why Current Approach Fails',
+      subtitle: 'Home inspection gets sold like a commodity',
+      content: (
+        <div className="space-y-5">
+          <div className="text-center mb-4">
+            <p className="text-base text-gray-700 italic">
+              If the SP cannot explain local risk, the cheapest inspector sounds "good enough."
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            {/* Left side - What caller hears today (RED) */}
+            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl p-6 border-2 border-red-200 shadow-md">
+              <div className="mb-4">
+                <div className="inline-block bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-3">
+                  What the caller hears today
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-4">
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Generic pitch: "We are thorough and professional."</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">No proof tied to the specific ZIP, age, or property profile</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Add-ons sound optional instead of necessary</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Price objection lands with no strong rebuttal</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">New SP confidence varies wildly call to call</div>
+                </div>
+              </div>
+
+              <div className="bg-red-100 rounded-lg p-3 border border-red-300">
+                <div className="text-xs font-bold text-red-900 mb-1">Outcome:</div>
+                <div className="text-xs text-red-800">Buyer compares line-item price, not inspection value</div>
+              </div>
+            </div>
+
+            {/* Right side - What SP needs caller to hear (GREEN) */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200 shadow-md">
+              <div className="mb-4">
+                <div className="inline-block bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-3">
+                  What SP needs the caller to hear
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-4">
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Localized evidence: "Homes in this area commonly show moisture or sewer issues."</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Risk framing: repair cost if the issue gets missed</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Smart bundling: why this property should add mold, air quality, radon, or sewer scope</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">Differentiation: what lower-cost inspectors usually do not surface</div>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-green-600 mt-1.5 flex-shrink-0"></div>
+                  <div className="text-sm text-gray-800">A precise closing statement that defends price and drives action</div>
+                </div>
+              </div>
+
+              <div className="bg-green-100 rounded-lg p-3 border border-green-300">
+                <div className="text-xs font-bold text-green-900 mb-1">Outcome:</div>
+                <div className="text-xs text-green-800">Buyer understands risk, not just price</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom message with arrow */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 text-white text-center shadow-md">
+            <div className="flex items-center justify-center space-x-3">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+              <div className="font-bold text-lg">Shift the conversation</div>
+            </div>
+            <div className="text-sm mt-1 opacity-95">from cost to consequence</div>
           </div>
         </div>
       ),
@@ -105,28 +179,8 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
           {/* Main success stat */}
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200 shadow-md">
             <div className="text-center">
-              <div className="text-5xl font-bold text-green-600 mb-3">Higher Conversion</div>
-              <div className="text-xl font-semibold text-gray-900 mb-2">With WIN Assist</div>
-              <div className="text-base text-gray-700 mb-4">
-                <span className="bg-green-100 px-4 py-2 rounded-full">Majority of leads convert</span>
-              </div>
-
-              {/* Comparison bar */}
-              <div className="flex items-center justify-center gap-6 mt-4">
-                <div className="flex flex-col items-center">
-                  <div className="text-xs font-medium text-gray-600 mb-2">Before</div>
-                  <div className="w-16 h-24 bg-red-400 rounded-lg flex items-center justify-center">
-                    <div className="text-white font-semibold text-sm">Low</div>
-                  </div>
-                </div>
-                <div className="text-2xl text-gray-400">→</div>
-                <div className="flex flex-col items-center">
-                  <div className="text-xs font-medium text-gray-600 mb-2">After</div>
-                  <div className="w-16 h-36 bg-gradient-to-t from-green-600 to-emerald-500 rounded-lg flex items-center justify-center shadow-md">
-                    <div className="text-white font-semibold text-sm">High</div>
-                  </div>
-                </div>
-              </div>
+              <div className="text-5xl font-bold text-green-600 mb-3">WIN Assist</div>
+              <div className="text-xl font-semibold text-gray-900 mb-2">In one live workflow, the system turns a ZIP code into proof, recommendations, and the exact words to say next.</div>
             </div>
           </div>
 
@@ -134,18 +188,18 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 shadow-sm">
               <div className="text-2xl mb-2">🏠</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">Property Intelligence</div>
-              <div className="text-xs text-gray-600">Instant property details from Zillow API</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">Understand the property</div>
+              <div className="text-xs text-gray-600">ZIP + home age + property type + local inspection history create a context-rich profile before the call drifts into price.</div>
             </div>
             <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200 shadow-sm">
               <div className="text-2xl mb-2">📊</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">Area Expertise</div>
-              <div className="text-xs text-gray-600">Real inspection data from local ZIP codes</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">Quantify the risk</div>
+              <div className="text-xs text-gray-600">Hyperlocal issue likelihood and repair-cost ranges reframe the conversation from “inspection fee” to “cost of missing something real.”</div>
             </div>
             <div className="bg-purple-50 rounded-xl p-4 border border-purple-200 shadow-sm">
               <div className="text-2xl mb-2">💬</div>
-              <div className="font-semibold text-gray-900 mb-1 text-sm">AI Coaching</div>
-              <div className="text-xs text-gray-600">Powered by Claude Sonnet 4</div>
+              <div className="font-semibold text-gray-900 mb-1 text-sm">Guide the close</div>
+              <div className="text-xs text-gray-600">The tool recommends the best service bundle, handles objections, and surfaces a tailored closing statement in real time.</div>
             </div>
           </div>
         </div>
@@ -202,7 +256,8 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 </div>
                 <div className="font-bold text-gray-900 text-base">Address Concerns</div>
               </div>
-              <div className="text-sm text-gray-700 mb-3 italic">"I know you're comparing options. We deliver same-day reports while most companies take 3 days. Plus, our reports are insurance-ready."</div>
+              <div className="text-sm text-gray-700 mb-3 italic">"I completely understand you’re comparing options. One thing that really sets us apart, beyond same-day reports, is how you actually use the inspection report after.
+Our reports are interactive and easy to navigate, so you’re not stuck going through a long PDF. We also include a Property Care List, which helps you understand what needs attention now vs later…"</div>
               <div className="text-sm text-orange-700 font-semibold">Handles objections before they become deal-breakers</div>
             </div>
 
@@ -247,7 +302,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 </div>
                 <div>
                   <div className="font-bold text-gray-900 text-base mb-2">Real Property Data</div>
-                  <div className="text-sm text-gray-700">Pulls live data from Zillow API - actual property age, size, and characteristics</div>
+                  <div className="text-sm text-gray-700">Pulls live data - actual property age, size, and characteristics</div>
                 </div>
               </div>
               <div className="bg-blue-50 rounded-lg p-3 mt-2">
@@ -306,7 +361,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
 
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-5 text-white text-center shadow-md">
             <div className="font-bold text-lg mb-2">The Result: Instant Local Expert</div>
-            <div className="text-sm opacity-95">Every service provider sounds like they've been working in that neighborhood for years - from the very first call.</div>
+            <div className="text-sm opacity-95">Every SP sounds like they've been working in that neighborhood for years - from the very first call.</div>
           </div>
         </div>
       ),
@@ -375,7 +430,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 text-white shadow-md">
             <div className="text-center mb-2">
               <div className="font-bold text-base mb-1">The Difference: Instant Credibility Wins Leads</div>
-              <div className="text-sm opacity-95">WIN Assist transforms generic responses into expert consultations - winning leads in the first 60 seconds.</div>
+              <div className="text-sm opacity-95">WIN Assist transforms generic responses into expert consultations making the client feel confident.</div>
             </div>
             <div className="text-xs opacity-90 mt-3 pt-3 border-t border-white/30 text-center">
               <span className="font-semibold">Bonus:</span> Once the lead converts, trust enables better recommendations (e.g., relevant add-ons based on area data)
@@ -404,7 +459,6 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 <div className="flex-1 bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
                   <div className="flex items-center justify-between mb-1">
                     <div className="font-semibold text-gray-900 text-sm">Client Mentions Address</div>
-                    <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">0 sec</div>
                   </div>
                   <div className="text-xs text-gray-600 mb-1">"I need an inspection for 503 S Main St, Covington TN 38019"</div>
                   <div className="text-xs text-blue-700">Voice recognition auto-detects address</div>
@@ -419,7 +473,6 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 <div className="flex-1 bg-white rounded-lg p-4 border border-indigo-200 shadow-sm">
                   <div className="flex items-center justify-between mb-1">
                     <div className="font-semibold text-gray-900 text-sm">Instant Data Fetch</div>
-                    <div className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium">3 sec</div>
                   </div>
                   <div className="text-xs text-gray-600 mb-1">Zillow property data + 136 inspection reports from ZIP</div>
                   <div className="text-xs text-indigo-700">1996 home, 1512 sq ft • 24% roof issues • 18% HVAC problems</div>
@@ -434,7 +487,6 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 <div className="flex-1 bg-white rounded-lg p-4 border border-purple-200 shadow-sm">
                   <div className="flex items-center justify-between mb-1">
                     <div className="font-semibold text-gray-900 text-sm">AI-Powered Response</div>
-                    <div className="bg-purple-50 text-purple-700 px-2 py-1 rounded-full text-xs font-medium">30 sec</div>
                   </div>
                   <div className="text-xs text-gray-600 mb-1">"We've inspected 136 homes in your ZIP. For a 1996 home, we focus on roofs and HVAC..."</div>
                   <div className="text-xs text-purple-700">Demonstrates local expertise instantly</div>
@@ -449,73 +501,9 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 <div className="flex-1 bg-green-600 rounded-lg p-4 border border-green-500 shadow-sm">
                   <div className="flex items-center justify-between mb-1">
                     <div className="font-semibold text-white text-sm">Lead Converted</div>
-                    <div className="bg-green-700 text-green-100 px-2 py-1 rounded-full text-xs font-medium">60 sec</div>
                   </div>
                   <div className="text-xs text-white mb-1">"I'll schedule you for Tuesday at 2pm."</div>
                   <div className="text-xs text-green-100">Inspection booked successfully</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'roi',
-      title: 'Business Impact',
-      subtitle: 'Real Numbers, Real Results',
-      content: (
-        <div className="space-y-3">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200 shadow-md">
-            <div className="text-center mb-3">
-              <div className="text-lg font-semibold text-gray-900 mb-0.5">Estimated Business Impact</div>
-              <div className="text-xs text-gray-600">For a mid-size franchise network</div>
-            </div>
-
-            {/* Math breakdown */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-blue-200">
-                <div className="text-xs text-gray-600 mb-0.5 font-medium">Daily Leads per SP</div>
-                <div className="text-3xl font-bold text-blue-600">~10</div>
-                <div className="text-xs text-gray-500 mt-0.5">Industry average</div>
-              </div>
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-red-200">
-                <div className="text-xs text-gray-600 mb-0.5 font-medium">Before</div>
-                <div className="text-3xl font-bold text-red-600">Low</div>
-                <div className="text-xs text-gray-500 mt-0.5">Most leads lost</div>
-              </div>
-              <div className="bg-green-600 rounded-lg p-3 shadow-sm border border-green-500">
-                <div className="text-xs text-white mb-0.5 font-medium">With WIN Assist</div>
-                <div className="text-3xl font-bold text-white">High</div>
-                <div className="text-xs text-green-100 mt-0.5">Majority convert</div>
-              </div>
-            </div>
-
-            {/* Impact numbers */}
-            <div className="bg-green-600 rounded-xl p-3 text-white shadow-md">
-              <div className="text-center">
-                <div className="text-sm font-semibold mb-0.5">Estimated Additional Conversions</div>
-                <div className="text-3xl font-bold mb-0.5">XXX,XXX+</div>
-                <div className="text-xs opacity-90 mb-2">Potential annual inspections gained</div>
-
-                <div className="pt-2 border-t border-white/30">
-                  <div className="text-sm font-semibold mb-0.5">Estimated Revenue Impact</div>
-                  <div className="text-3xl font-bold mb-0.5">$XXM+</div>
-                  <div className="text-xs opacity-90">Potential additional annual revenue</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Key insight - highlighted */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-yellow-400 rounded-xl blur-md opacity-30"></div>
-            <div className="relative bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-400 rounded-xl p-4 shadow-md">
-              <div className="flex items-center space-x-3">
-                <div className="text-2xl flex-shrink-0">⚡</div>
-                <div className="flex-1">
-                  <div className="font-bold text-gray-900 text-base mb-1">From the same number of leads</div>
-                  <div className="text-xs text-gray-800 font-medium">No additional marketing spend. Just better conversion through instant expertise.</div>
                 </div>
               </div>
             </div>
@@ -543,9 +531,6 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
             <h3 className="text-3xl font-bold mb-3 text-gray-900">
               Ready to See WIN Assist in Action?
             </h3>
-            <p className="text-base text-gray-700 mb-3 max-w-2xl mx-auto">
-              Watch how a service provider converts a lead using voice input, property intelligence, and AI-powered conversation coaching.
-            </p>
           </div>
 
           {/* Demo features grid */}
@@ -565,7 +550,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 <div className="text-xl">🏠</div>
                 <div>
                   <div className="text-xs font-semibold text-gray-900">Property Data</div>
-                  <div className="text-xs text-gray-600">Live from Zillow API</div>
+                  <div className="text-xs text-gray-600">Live from public API</div>
                 </div>
               </div>
               <div className="flex items-center space-x-2 bg-white rounded-lg p-3 shadow-sm border border-purple-200">
@@ -579,7 +564,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 <div className="text-xl">💬</div>
                 <div>
                   <div className="text-xs font-semibold text-gray-900">AI Coaching</div>
-                  <div className="text-xs text-gray-600">Claude Sonnet 4</div>
+                  <div className="text-xs text-gray-600">Claude / Gemini</div>
                 </div>
               </div>
             </div>

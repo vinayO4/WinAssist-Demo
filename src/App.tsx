@@ -61,6 +61,45 @@ function App() {
     console.log('[SuggestionMode] Mode changed to:', suggestionMode);
   }, [suggestionMode]);
 
+  // Manual refresh function for suggestions
+  const manualRefreshSuggestions = useCallback(() => {
+    if (!detectedZip || !zipData || isLoadingSuggestions) {
+      console.log('[Manual Refresh] Cannot refresh - missing requirements');
+      return;
+    }
+
+    console.log('[Manual Refresh] Forcing suggestion regeneration...');
+    // Reset flags to force regeneration
+    setInitialContextSent(false);
+    setLastTranscriptLength(0);
+
+    // The useEffect that monitors transcript changes will handle the actual generation
+  }, [detectedZip, zipData, isLoadingSuggestions]);
+
+  // Auto-scroll transcript to bottom when it updates
+  useEffect(() => {
+    const transcriptElements = document.querySelectorAll('.transcript-display');
+    transcriptElements.forEach(el => {
+      el.scrollTop = el.scrollHeight;
+    });
+
+    // Log transcript updates for debugging
+    if (transcript) {
+      console.log('[Transcript Update] Length:', transcript.length, 'Last 100 chars:', transcript.slice(-100));
+    }
+  }, [transcript, interimTranscript]);
+
+  // Regenerate suggestions when mode changes (if we have ZIP data)
+  useEffect(() => {
+    if (detectedZip && zipData && transcript.length > 0 && !isLoadingSuggestions) {
+      console.log('[SuggestionMode] Mode changed, regenerating suggestions in new format');
+      // Reset the initial context flag to force regeneration
+      setInitialContextSent(false);
+      // Trigger regeneration by updating last transcript length
+      setLastTranscriptLength(0);
+    }
+  }, [suggestionMode]);
+
   // Manual input state
   const [manualInput, setManualInput] = useState('');
   const [questionResponse, setQuestionResponse] = useState('');
@@ -376,7 +415,8 @@ function App() {
       if (zipData.topIssues && zipData.topIssues.length > 0) {
         context += `🔧 MOST COMMON REPAIR ISSUES IN THIS AREA:\n`;
         zipData.topIssues.slice(0, 5).forEach((issue: any, index: number) => {
-          context += `  ${index + 1}. ${issue.categoryName} (${issue.percentage}% of reports)\n`;
+          const displayPercentage = Math.min(issue.percentage, 100);
+          context += `  ${index + 1}. ${issue.categoryName} (${displayPercentage}% of homes)\n`;
           context += `     "${issue.remarkTitle}" - Found in ${issue.count} reports\n`;
           context += `     Most common in: ${issue.serviceName}\n`;
         });
@@ -592,8 +632,10 @@ function App() {
       return;
     }
 
-    if (transcript.length < 50) {
-      console.log('[Suggestions] Transcript too short, waiting for more content');
+    // For first request after ZIP data loads, allow immediately even with short transcript
+    // For subsequent requests, require minimum transcript length
+    if (initialContextSent && transcript.length < 50) {
+      console.log('[Suggestions] Transcript too short for subsequent request, waiting for more content');
       return;
     }
 
@@ -633,15 +675,20 @@ function App() {
 
 Example format:
 "I see you're in [location]. Based on the [X] inspection reports in your area, I'd recommend [specific service] because we commonly find [specific issue] in [Y]% of homes here. This is critical for [reason]."`
-          : `\n\nFORMAT: Provide BULLET-POINT TALKING POINTS (3-7 words each) that guide what to discuss, NOT full sentences. Let the SP frame their own natural sentences.
+          : `\n\nFORMAT REQUIREMENT: Provide SHORT ONE-LINE TALKING POINTS (maximum 10-12 words per bullet). These are conversation starters, NOT full sentences to read.
 
-Example format:
-• Mention: 4-Point Inspection (31% usage)
-• Reference: Roof issues (6% of homes)
-• Create urgency: Insurance requirement
-• Highlight: Area-specific data
+CORRECT Examples:
+• We've inspected 136 homes in your exact ZIP code
+• Property built 1982 - focus on roof and HVAC
+• 24% of homes here have roof issues
+• 4-Point inspection required for insurance (homes 30+ years)
+• Same-day reports while competitors take 3 days
 
-Each bullet should be SHORT and give the GIST of what to say, not the exact words.`;
+INCORRECT Examples (DO NOT DO THIS):
+✗ "I can tell you that based on our 136 inspections in your ZIP, we know exactly what to look for in homes like yours, which is why we recommend these specific services." (TOO LONG - multiple sentences)
+✗ Full paragraphs or multiple sentences (NOT ALLOWED)
+
+CRITICAL: Each bullet is a brief talking point (10-12 words max) that the service provider will expand on naturally. Do not write complete scripts.`;
 
         if (!initialContextSent) {
           // FIRST REQUEST: Send comprehensive context with ALL data
@@ -742,7 +789,7 @@ Context: ${zipData.city}, ${zipData.state} (ZIP ${zipData.zip})`;
   };
 
   // Smart handler that detects input type
-  const handleManualSubmit = async (e: React.FormEvent) => {
+  const handleManualSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!manualInput.trim()) return;
 
@@ -789,7 +836,7 @@ Based on ${zipData.totalReports || 0} inspection reports in this area, provide a
 ${zipData.topIssues && zipData.topIssues.length > 0 ? `
 Common issues in this area include:
 ${zipData.topIssues.slice(0, 5).map((issue: any) =>
-  `- ${issue.remarkTitle} (found in ${issue.percentage}% of inspections)`
+  `- ${issue.remarkTitle} (found in ${Math.min(issue.percentage, 100)}% of homes)`
 ).join('\n')}` : ''}
 
 User question: ${input}`
@@ -1149,15 +1196,18 @@ User question: ${input}`;
               </div>
 
               {/* Modern Transcript Display */}
-              <div className="mt-6 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 min-h-[300px] max-h-[500px] overflow-y-auto border-2 border-gray-200/50 shadow-inner">
+              <div className="transcript-display mt-6 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 min-h-[300px] max-h-[500px] overflow-y-auto border-2 border-gray-200/50 shadow-inner">
                 {transcript || interimTranscript ? (
                   speakerMode === 'off' ? (
-                    <div className="text-gray-900 whitespace-pre-wrap leading-relaxed">
-                      <span>{transcript}</span>
+                    <div key={transcript.length} className="text-gray-900 whitespace-pre-wrap leading-relaxed">
+                      <span className="font-medium">{transcript}</span>
                       {interimTranscript && (
-                        <span className="text-gray-500 italic">
-                          {transcript ? ' ' : ''}{interimTranscript}
+                        <span className="text-gray-500 italic ml-1">
+                          {interimTranscript}
                         </span>
+                      )}
+                      {!interimTranscript && transcript && (
+                        <span className="inline-block w-2 h-4 bg-blue-500 ml-1 animate-pulse"></span>
                       )}
                     </div>
                   ) : (
@@ -1305,6 +1355,20 @@ User question: ${input}`;
                           • Bullets
                         </button>
                       </div>
+
+                      {/* Manual Refresh Button */}
+                      {detectedZip && zipData && !isLoadingSuggestions && (
+                        <button
+                          onClick={manualRefreshSuggestions}
+                          className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all"
+                          title="Refresh suggestions based on latest conversation"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          <span>Refresh</span>
+                        </button>
+                      )}
 
                       {/* Loading indicator */}
                       {isLoadingSuggestions && (
@@ -1516,59 +1580,6 @@ User question: ${input}`;
               </div>
             )}
 
-            {/* Lead Conversion Metrics Panel */}
-            {zipData && (
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl blur-2xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                <div className="relative bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-6 border border-white/20">
-                  <h3 className="font-bold text-blue-900 mb-4 text-lg">📈 Lead Conversion Impact</h3>
-
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-red-50 rounded-xl p-4 border-2 border-red-200">
-                      <div className="text-xs text-red-600 mb-1 font-semibold">Without AI</div>
-                      <div className="text-3xl font-bold text-red-600">20%</div>
-                      <div className="text-xs text-gray-600 mt-1">Conversion rate</div>
-                      <div className="text-xs text-gray-700 mt-2">2 out of 10 leads</div>
-                    </div>
-                    <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-4 border-2 border-green-400 shadow-lg">
-                      <div className="text-xs text-white/90 mb-1 font-semibold">With AI ✓</div>
-                      <div className="text-3xl font-bold text-white">60%</div>
-                      <div className="text-xs text-white/90 mt-1">Conversion rate</div>
-                      <div className="text-xs text-white font-semibold mt-2">6 out of 10 leads</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 border-2 border-green-300">
-                    <div className="text-sm font-bold text-green-900 mb-2">🎯 For This Lead</div>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-700">Conversion Probability:</span>
-                        <span className="font-bold text-green-700">
-                          {propertyData && propertyData.propertyAge && propertyData.propertyAge > 25 ? '78% Strong' : '65% Good'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-700">Key Differentiator:</span>
-                        <span className="font-bold text-blue-700">
-                          {zipData.totalReports ? `${zipData.totalReports} local inspections` : 'Local expertise'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-700">Best Close Strategy:</span>
-                        <span className="font-bold text-indigo-700">Tues/Thurs options</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t-2 border-blue-200">
-                    <div className="text-xs text-blue-800 font-semibold">
-                      💡 SPs using WIN Assist convert 3x more leads by demonstrating property-specific expertise in the first 60 seconds
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Why WIN? Panel */}
             {zipData && zipData.totalReports && zipData.totalReports > 0 && (
               <div className="relative group">
@@ -1604,7 +1615,7 @@ User question: ${input}`;
                         <div>
                           <div className="font-bold text-gray-900">Area-Specific Focus</div>
                           <div className="text-gray-700 text-xs">
-                            {zipData.topIssues[0].percentage}% of homes in your area have {zipData.topIssues[0].categoryName.toLowerCase()} issues. We spend extra time on this because we know local patterns.
+                            {Math.min(zipData.topIssues[0].percentage, 100)}% of homes in your area have {zipData.topIssues[0].categoryName.toLowerCase()} issues. We spend extra time on this because we know local patterns.
                           </div>
                         </div>
                       </div>
@@ -1773,9 +1784,9 @@ User question: ${input}`;
                                     ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white'
                                     : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                                 }`}>
-                                  {issue.percentage}%
+                                  {Math.min(issue.percentage, 100)}%
                                 </span>
-                                <span className="text-xs text-gray-500 mt-1">of reports</span>
+                                <span className="text-xs text-gray-500 mt-1">of homes</span>
                               </div>
                             </div>
                             <div className="text-gray-500 text-xs">
