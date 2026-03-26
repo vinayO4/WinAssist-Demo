@@ -6,7 +6,6 @@ import { fetchReportsByZip, aggregateReportData, convertToZipData } from './serv
 import { getLocationFromZip } from './utils/geocoding';
 import {
   fetchPropertyFromZillow,
-  getMockPropertyData,
   generatePropertyBasedRecommendations,
   parseAddressFromTranscript,
   type PropertyDetails,
@@ -213,12 +212,18 @@ function App() {
               setDetectedZip(zip);
 
               // ALWAYS fetch ZIP/area data from WinSpect API first
-              fetchZipData(zip);
+              // Skip property fetch since we're getting it from Zillow below
+              fetchZipData(zip, true);
 
               // Fetch property data from Zillow (independent, won't block WinSpect)
               if (street && city && state) {
-                console.log('[Google Places] Fetching property data from Zillow...');
-                console.log('[Google Places] Zillow params:', { street, city, state, zip });
+                console.log('[Google Places] ========================================');
+                console.log('[Google Places] 🏠 FETCHING PROPERTY DATA FROM ZILLOW');
+                console.log('[Google Places] Address:', street);
+                console.log('[Google Places] City:', city);
+                console.log('[Google Places] State:', state);
+                console.log('[Google Places] ZIP:', zip);
+                console.log('[Google Places] ========================================');
                 fetchPropertyFromZillow(street, city, state, zip)
                   .then(data => {
                     console.log('[Google Places] Zillow API response data:', data);
@@ -228,12 +233,12 @@ function App() {
                       setPropertyData(data);
                     } else {
                       console.log('[Google Places] No property data found from Zillow (returned null/undefined)');
-                      setPropertyData(null);
+                      // setPropertyData(null);
                     }
                   })
                   .catch(error => {
                     console.error('[Google Places] Zillow API error:', error);
-                    setPropertyData(null);
+                    // setPropertyData(null);
                   });
               } else {
                 console.log('[Google Places] Incomplete address - skipping Zillow lookup');
@@ -477,27 +482,32 @@ function App() {
         }
       }
 
-      // Fallback to mock data if real API failed or not available
-      if (!propertyData) {
-        propertyData = getMockPropertyData(zip);
-        console.log('[fetchPropertyData] ✓ Loaded mock property data');
+      // NO MOCK DATA - Only show real data or nothing
+      if (propertyData) {
+        console.log('[fetchPropertyData] ⚠️ SETTING PROPERTY DATA:', {
+          address: propertyData.address,
+          zip: propertyData.zip,
+          source: propertyData.source,
+          yearBuilt: propertyData.yearBuilt
+        });
+        setPropertyData(propertyData);
+
+        // Show property-based recommendations
+        const recommendations = generatePropertyBasedRecommendations(propertyData);
+        console.log('[fetchPropertyData] Property-based recommendations:', recommendations);
+      } else {
+        console.log('[fetchPropertyData] ⚠️ No real property data available - NOT using mock data');
+        // setPropertyData(null);
       }
-
-      setPropertyData(propertyData);
-
-      // Show property-based recommendations
-      const recommendations = generatePropertyBasedRecommendations(propertyData);
-      console.log('[fetchPropertyData] Property-based recommendations:', recommendations);
     } catch (error) {
       console.error('[fetchPropertyData] Error fetching property data:', error);
-      // Fallback to mock on error
-      const mockProperty = getMockPropertyData(zip);
-      setPropertyData(mockProperty);
+      // NO MOCK DATA - Set to null on error
+      // setPropertyData(null);
     }
-  }, [detectedZip]);
+  }, [detectedZip, propertyData]);
 
   // Fetch ZIP data from real API or fallback to mock
-  const fetchZipData = useCallback(async (zip: string) => {
+  const fetchZipData = useCallback(async (zip: string, skipPropertyFetch = false) => {
     console.log(`[fetchZipData] Starting fetch for ZIP: ${zip}`);
     setIsLoadingZipData(true);
     setZipDataError(null);
@@ -525,21 +535,29 @@ function App() {
           setDataSource('real');
           console.log(`✓ Loaded ${aggregated.totalInspections} inspection reports for ZIP ${zip} from WinSpect API`);
 
-          // Also fetch property data for enhanced suggestions
-          fetchPropertyData(zip);
+          // Also fetch property data for enhanced suggestions (only if not already fetched)
+          if (!skipPropertyFetch) {
+            fetchPropertyData(zip);
+          } else {
+            console.log('[fetchZipData] Skipping property fetch - already have property data');
+          }
         } else {
           console.warn('Could not aggregate report data, using mock data');
           const mockData = getZipData(zip);
           setZipData(mockData);
           setDataSource('mock');
-          fetchPropertyData(zip);
+          if (!skipPropertyFetch) {
+            fetchPropertyData(zip);
+          }
         }
       } else {
         console.warn(`No inspection reports found for ZIP ${zip}, using mock data`);
         const mockData = getZipData(zip);
         setZipData(mockData);
         setDataSource('mock');
-        fetchPropertyData(zip);
+        if (!skipPropertyFetch) {
+          fetchPropertyData(zip);
+        }
       }
     } catch (error) {
       console.error('Error fetching WinSpect data:', error);
@@ -549,7 +567,9 @@ function App() {
       if (mockData) {
         setZipData(mockData);
         setDataSource('mock');
-        fetchPropertyData(zip);
+        if (!skipPropertyFetch) {
+          fetchPropertyData(zip);
+        }
       } else {
         setZipDataError(`No data available for ZIP ${zip}`);
       }
@@ -591,11 +611,18 @@ function App() {
 
           console.log('[useEffect] ZIP found - will CONTINUE listening for real-time coaching');
           setDetectedZip(zip);
-          fetchZipData(zip);
+
+          // Check if we already have property data to avoid overwriting
+          const hasPropertyData = !!(propertyData && propertyData.zip === zip);
+          console.log('[useEffect] Has property data?', hasPropertyData, 'Property ZIP:', propertyData?.zip, 'Detected ZIP:', zip);
+          fetchZipData(zip, hasPropertyData);
 
           // Fetch property data (with address if available)
-          if (addressInfo.street && addressInfo.city && addressInfo.state) {
+          if (addressInfo.street && addressInfo.city && addressInfo.state && !hasPropertyData) {
+            console.log('[useEffect] Fetching property data with full address');
             fetchPropertyData(zip, addressInfo.street, addressInfo.city, addressInfo.state);
+          } else if (hasPropertyData) {
+            console.log('[useEffect] ✓ Already have property data, skipping fetch to preserve real data');
           }
         }
       } else {
@@ -606,7 +633,10 @@ function App() {
           console.log(`[useEffect] ✓ Detected ZIP code (fallback): ${zip}`);
           console.log('[useEffect] ZIP found - will CONTINUE listening for real-time coaching');
           setDetectedZip(zip);
-          fetchZipData(zip);
+
+          // Check if we already have property data to avoid overwriting
+          const hasPropertyData = !!(propertyData && propertyData.zip === zip);
+          fetchZipData(zip, hasPropertyData);
 
           // Auto-populate just the ZIP
           setManualInput(zip);
@@ -615,7 +645,7 @@ function App() {
         }
       }
     }
-  }, [transcript, detectedZip, fetchZipData, fetchPropertyData]);
+  }, [transcript, detectedZip, fetchZipData, fetchPropertyData, propertyData]);
 
   // Reset initial context flag when ZIP changes
   useEffect(() => {

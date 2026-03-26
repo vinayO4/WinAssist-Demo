@@ -228,7 +228,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 </div>
                 <div className="font-bold text-gray-900 text-base">Build Trust</div>
               </div>
-              <div className="text-sm text-gray-700 mb-3 italic">"We've inspected 136 homes in your ZIP code. We know exactly what to look for in that neighborhood."</div>
+              <div className="text-sm text-gray-700 mb-3 italic">"We’ve worked with quite a few homes in your neighborhood, so we’re very familiar with how properties like yours are built and how they tend to perform over time. That helps us focus on what really matters for your home."</div>
               <div className="text-sm text-green-700 font-semibold">Establishes credibility immediately with specific local data</div>
             </div>
 
@@ -242,7 +242,7 @@ export function PresentationSlider({ isOpen, onClose, onStartDemo }: Presentatio
                 </div>
                 <div className="font-bold text-gray-900 text-base">Show Expertise</div>
               </div>
-              <div className="text-sm text-gray-700 mb-3 italic">"For a 1996 home in your area, 24% have roof issues. That's why we focus extra attention on the roof structure and shingles."</div>
+              <div className="text-sm text-gray-700 mb-3 italic">"In this area, we’ve inspected a number of homes like yours, so we’ve seen how local weather, materials, and construction styles tend to influence things over time. Nothing unusual, just patterns we’ve learned to pay closer attention to. That allows us to focus on the areas that matter most, and if needed, recommend additional services that give you a more complete picture."</div>
               <div className="text-sm text-blue-700 font-semibold">Demonstrates knowledge competitors don't have</div>
             </div>
 
@@ -410,7 +410,7 @@ Our reports are interactive and easy to navigate, so you’re not stuck going th
 
               <div className="bg-white rounded-lg p-4 mb-3 border border-green-200">
                 <div className="text-sm text-gray-800 italic mb-3">
-                  "I can help you right away. I see your home was built in 1996. We've inspected 136 homes in your ZIP - 24% had roof issues due to age. We know exactly what to check for homes like yours."
+                  "Yeah, I can help you with that right away. We’ve worked with a lot of homes in your neighborhood, so we already have a good sense of what to focus on. What really sets us apart is how clear and useful everything is after the inspection. Our reports are interactive and easy to navigate, so you’re not stuck going through a long PDF trying to figure things out. Everything is backed by over 45,000 five-star reviews, so there’s a strong level of trust behind what we do. So it’s not just about getting an inspection. It’s about making sure you feel confident in your decision."
                 </div>
                 <div className="text-xs text-gray-600">
                   → Demonstrates local expertise immediately<br/>
